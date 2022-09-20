@@ -20,7 +20,7 @@ import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import moment from "moment";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-
+import CloseIcon from "@mui/icons-material/Close";
 import InputAdornment from "@mui/material/InputAdornment";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
@@ -51,7 +51,7 @@ const style = {
     transform: "translate(-50%, -50%)",
     width: 400,
     bgcolor: "background.paper",
-    border: "2px solid #000",
+
     boxShadow: 24,
     p: 4,
   },
@@ -80,22 +80,17 @@ export default function Home() {
   const [open, setOpen] = React.useState(false);
   const [edit, setEdit] = React.useState();
   const [open1, setOpen1] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const handleOpen1 = (data) => {
+
+  const handleOpen = (data) => {
     setEdit(data);
     setOpen(true);
   };
-  const handleClose1 = () => setOpen(false);
-  //   React.useEffect(() => {
-  //     axios
-  //       .get("http://localhost:3000/v1")
-  //       .then((res) => console.log(res.data.data))
-  //       .catch((err) => console.log(err));
-  //   }, [])
+  const handleOpen1 = () => setOpen1(true);
+  const handleClose = () => setOpen(false);
+  const handleClose1 = () => setOpen1(false);
 
   //   All data
-  const usersApi = "http://localhost:3000/v1";
+  const usersApi = "https://odko.ilearn.mn/v1";
   const fetcher = async (url) =>
     await axios.get(url).then((res) => res.data.data);
   const { data, error, mutate } = useSWR(usersApi, fetcher);
@@ -104,7 +99,7 @@ export default function Home() {
   function handleSubmit(e) {
     e.preventDefault();
     axios
-      .put(`http://localhost:3000/v1/${edit._id}`, {
+      .put(`https://odko.ilearn.mn/v1/${edit._id}`, {
         book_name: e.target.name.value,
         book_Price: e.target.price.value,
         book_Author: e.target.authors.value,
@@ -124,9 +119,9 @@ export default function Home() {
 
   function handleSubmitCreate(e) {
     e.preventDefault();
-    console.log(e.target.Published.value);
+    console.log(e);
     axios
-      .post(`http://localhost:3000/v1`, {
+      .post(`https://odko.ilearn.mn/v1`, {
         book_name: e.target.name.value,
         book_Price: e.target.price.value,
         book_Author: e.target.authors.value,
@@ -146,7 +141,7 @@ export default function Home() {
 
   function handleDlt(id) {
     axios
-      .delete(`http://localhost:3000/v1/${id}`)
+      .delete(`https://odko.ilearn.mn/v1/${id}`)
       .then((res) => {
         if (res.status === 200) {
           alert("delete");
@@ -163,8 +158,13 @@ export default function Home() {
           <Table sx={{ minWidth: 700 }} aria-label="customized table">
             <TableHead sx={{ borderBottom: "0.5px solid gray" }}>
               <TableRow>
+                <StyledTableCell sx={{ fontWeight: "600" }}>#</StyledTableCell>
                 {title.map((title, i) => {
-                  return <StyledTableCell key={i}>{title}</StyledTableCell>;
+                  return (
+                    <StyledTableCell key={i} sx={{ fontWeight: "600" }}>
+                      {title}
+                    </StyledTableCell>
+                  );
                 })}
               </TableRow>
             </TableHead>
@@ -173,11 +173,16 @@ export default function Home() {
                 data.map((data, i) => {
                   return (
                     <StyledTableRow key={i}>
-                      <StyledTableCell component="th" scope="row">
+                      <StyledTableCell>{i + 1}</StyledTableCell>
+                      <StyledTableCell
+                        component="th"
+                        scope="row"
+                        sx={{ fontWeight: "600" }}
+                      >
                         {data.book_Author}
                       </StyledTableCell>
                       <StyledTableCell>{data.book_Code}</StyledTableCell>
-                      <StyledTableCell>{data.book_Price}</StyledTableCell>
+                      <StyledTableCell>${data.book_Price}</StyledTableCell>
                       <StyledTableCell>{data.book_name}</StyledTableCell>
 
                       <StyledTableCell>{data.book_ISBN}</StyledTableCell>
@@ -186,7 +191,7 @@ export default function Home() {
                         {moment(data.book_Published).format("YYYY - MM - DD")}
                       </StyledTableCell>
                       <StyledTableCell>
-                        <Button onClick={() => handleOpen1(data)}>
+                        <Button onClick={() => handleOpen(data)}>
                           <EditIcon />
                         </Button>
                       </StyledTableCell>
@@ -224,6 +229,18 @@ export default function Home() {
             autoComplete="off"
             onSubmit={handleSubmit}
           >
+            <Button
+              sx={{
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "right",
+                marginBottom: "-30px",
+              }}
+              onClick={handleClose}
+            >
+              <CloseIcon />
+            </Button>
             <Typography
               id="modal-modal-title"
               variant="h6"
@@ -293,7 +310,6 @@ export default function Home() {
             <button>update</button>
           </Box>
         </Modal>
-
         <Modal
           open={open1}
           onClose={handleClose1}
@@ -307,6 +323,18 @@ export default function Home() {
             autoComplete="off"
             onSubmit={handleSubmitCreate}
           >
+            <Button
+              sx={{
+                display: "flex",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "right",
+                marginBottom: "-30px",
+              }}
+              onClick={handleClose1}
+            >
+              <CloseIcon />
+            </Button>
             <Typography
               id="modal-modal-title"
               variant="h6"
@@ -315,6 +343,7 @@ export default function Home() {
             >
               Add Book
             </Typography>
+
             <TextField
               id="standard-basic"
               label="name"
@@ -364,16 +393,9 @@ export default function Home() {
               variant="outlined"
               name="Published"
               type="date"
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <CalendarMonthIcon />
-                  </InputAdornment>
-                ),
-              }}
               sx={{ width: "100%", marginBottom: "20px", marginBottom: "40px" }}
             />
-            <button>Update</button>
+            <button>create</button>
           </Box>
         </Modal>
       </div>
